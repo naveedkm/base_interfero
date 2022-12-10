@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css"></link>
+    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/leaflet-gesture-handling.min.css" type="text/css">
+    <link rel="stylesheet" href="css/qgis2web.css">
+    <link rel="stylesheet" href="css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="css/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.4.2/Control.FullScreen.min.css" />
+    <link rel="stylesheet" href="css/leaflet.timedimension.control.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/default.min.css" />
+    <title>Deformation</title>
+  </head>
+  <body data-bs-spy="scroll" data-bs-target=".navbar">
+    <!-- Script -->
+    <script src="js/leaflet/leaflet.js"></script>
+    <script src="js/jquery-3.6.1.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/SliderControl.js"></script>
+    <script src="js/leaflet-gesture-handling.min.js"></script>
+    <script src="js/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="js/qgis2web_expressions.js"></script>
+    <script src="js/leaflet.rotatedMarker.js"></script>
+    <script src="js/leaflet.pattern.js"></script>
+    <script src="js/leaflet-hash.js"></script>
+    <script src="js/Autolinker.min.js"></script>
+    <script src="js/rbush.min.js"></script>
+    <script src="js/labelgun.min.js"></script>
+    <script src="js/labels.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.4.2/Control.FullScreen.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/leaflet.nontiledlayer@1.0.7/dist/NonTiledLayer.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/iso8601-js-period@0.2.1/iso8601.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/dateformat@3.0.3/lib/dateformat.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+
+    <script type="text/javascript" src="js/leaflet.timedimension.js"></script>
+    <script type="text/javascript" src="js/leaflet.timedimension.util.js"></script>
+    <script type="text/javascript" src="js/leaflet.timedimension.layer.js"></script>
+    <script type="text/javascript" src="js/leaflet.timedimension.layer.wms.js"></script>
+    <script type="text/javascript" src="js/leaflet.timedimension.layer.geojson.js"></script>
+    <script type="text/javascript" src="js/leaflet.timedimension.player.js"></script>
+    <script type="text/javascript" src="js/leaflet.timedimension.control.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+    <script type="text/javascript"></script>
+
+    <!-- GeoJSON -->
+    <script src="shapefile/titik.js"></script>
+    <script src="shapefile/garis.js"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="#">Fagradalsfjall</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="#home">Intro</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#peta">Peta</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#ltr">Latar Belakang</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    <section id="home">
+        <div class="container text-left">
+            <div class="row justify-content-center">
+                <div class="col-sm-4">
+                    <h2>Deformasi</h2>
+                    <h1>Fagradalsfjall<br/>Volcano</h1>
+                    <a href="#peta" class="btn btn-brand">Embark</a>
+                </div>
+                <div class="col-sm-8 d-flex justify-content-center" style="padding-left: 100px;">
+                    <p>Sebuah peta sederhana mengenai deformasi dari gunung berapi Fagradalsfjall, Iceland. Pengamatan dari sebelum hingga pasca deformasi yang mencerminkan jenis slip dari deformasi itu sendiri.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="peta">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+              <div class="col-sm-7">
+                <div class="map-wrapper">
+                  <div class="slidecontainer" style="display: flex; align-items: flex-end;">
+                    <input type="range" min="1" max="100" value="1" class="slider" id="slider">
+                    <label id="sliderLabel"></label>
+                  </div>
+                  <div id="mapdiv" style="z-index: 400;"></div>
+                  <script>
+                    const mymap = L.map("mapdiv", {
+                        gestureHandling: true
+                    }).setView([63.8926,-22.3003],10);
+                    var osm = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+                    );
+                    osm.addTo(mymap);
+                    var ttk = L.geoJson(titik)
+                    function tunjuk() {
+                    if (mymap.hasLayer(ttk)) {
+                    mymap.removeLayer(ttk)
+                      }
+                    else {
+                      mymap.addLayer(ttk)
+                      }}
+                    var bounds = new L.LatLngBounds(
+                      new L.LatLng(63.822201880354015,-22.441918193499966),
+                      new L.LatLng(63.96302104361162,-22.098656480735695));
+                      mymap.fitBounds(bounds);
+                    var months = ['0113', '1325']
+  
+                    // add all your years here (e.g. [1982,1983,1984,1985])
+                    var years = [0]
+  
+                    //storing all possible times
+                    var timeValues = []
+                    for(var i in years){
+                        for(var y in months){
+                            timeValues.push(months[y]+"_"+years[i])
+                        }
+                    }
+  
+                    //setting max value of the slider
+                    document.getElementById("slider").max = ""+timeValues.length+"";
+  
+                    //setting default label of the slider
+                    document.getElementById("sliderLabel").innerHTML = timeValues[0]
+  
+                    //change the prefix of the url if your images are not in the same folder as your script
+                    var urlPrefix = ""
+  
+                    var url = urlPrefix+timeValues[0]+".png"
+  
+                    var imageOverlay = new L.ImageOverlay(url, bounds, {
+                        opacity: 0.7,
+                        interactive: false,
+  
+                    }).addTo(mymap);
+  
+  
+                    //function when sliding
+                    slider.oninput = function() {
+                    //changing the label
+                    document.getElementById("sliderLabel").innerHTML = timeValues[this.value-1]
+                    //setting the url of the overlay
+                    imageOverlay.setUrl(urlPrefix+timeValues[this.value-1]+".png")
+                    }
+  
+                    var playTimeOut;
+  
+                    function play() {
+                        playTimeOut = setTimeout(function () {
+                            //increasing the slider by 1 (if not already at the end)
+                            var val = document.getElementById("slider").value
+                            console.log(val)
+                            //if end of slider, stopping
+                            if(val == document.getElementById("slider").max){
+                                clearTimeout(playTimeOut);
+                                //hidding the stop button
+                                document.getElementById('stop').style.display = "none";
+                                //showing the play button
+                                document.getElementById('play').style.display = "block";
+                            }
+                            else{
+                            document.getElementById("slider").value = Number(val)+1
+                            play()
+                            }
+                            //changing the label
+                            document.getElementById("sliderLabel").innerHTML = timeValues[Number(val)-1]
+                            //setting the url of the overlay
+                            imageOverlay.setUrl(urlPrefix+timeValues[Number(val)-1]+".png")
+  
+                        }, 1000);
+                    }
+                    document.getElementById('play').onclick = function(e){
+                    play()
+                    //showing the stop button
+                    document.getElementById('stop').style.display = "block";
+                    //hidding the play button
+                    document.getElementById('play').style.display = "none";
+                    }
+  
+                    document.getElementById('stop').onclick = function(e){
+                    clearTimeout(playTimeOut);
+                    //hidding the stop button
+                    document.getElementById('stop').style.display = "none";
+                    //showing the play button
+                    document.getElementById('play').style.display = "block";
+                    }
+  
+                    //hidding the stop button by default
+                    document.getElementById('stop').style.display = "none";
+                  </script>   
+                </div>
+                <div class="map-btn-pad">
+                  <input type="button" id="ttk" class="btn btn-continue" value="Click Me" onclick="tunjuk()">
+                </div>
+              </div>
+              <div class="col-sm-5">
+                <div class="col-sm-10 justify-content-center" style="padding-top: 40px; padding-left: 40px;">
+                  <h1>Interferometry<br/>Preview</h1>
+                  <h2 style="margin-top: 20px;"><i>Sentinel 1A</i></h2>
+                  <h2><i>Maret, 2021</i></h2>
+                  <h2 style="margin-top: 20px; font-size: 16px;">ASF Data Search, USGS</h2>
+                  <p style="margin-top: 140px;">Dua citra Interferometry; 01-13 Maret & 13-25 Maret, terlihat pada cuplikan peta disamping (temporal slider preview) dengan perbedaan susunan dan jumlah fringes yang signifikan.</p>
+                  <p style="margin-top: 10px;">Indikasi perubahan atau pergeseran pada interferogram periode pertama (01-13 Maret) tercatat sebesar <b>9 cm</b></p>
+                  <p style="margin-top: 10px;">Sepanjang fase pra-kejadian hingga pasca-kejadian terjadi pergeseran yang signifikan dengan tipikal geseran menjauh dari sensor atau deflasi</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </section>
+    <section id="ltr">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6 justify-content-start">
+                    <h1 style="margin-left: 100px;">Latar<br/>Belakang</h1>
+                    <p style="margin-top: 200px;">Wilayah Reykjanes Peninsula merupakan wilayah yang dilalui lempengan Eurasia-Amerika yang berada dibawah tinggi permukaan air rata-rata. Setiap tahunnya wilayah Reykjanes Peninsula mengalami pergeseran lempengan sebesar 19 mm.</p>
+                    <p style="margin-top: 10px;">Selama 800 tahun lebih, Fgradalsfjall merupakan gunung semi-aktif dengan catatan erupsi sebanyak <b>0 kali</b> hingga tahun 2021. Pada 2021, 19 Maret terjadi erupsi yang diikuti gempa bermagnitudo sedang sekitar <b>4-5 mW</b></p>
+                    <p style="margin-top: 10px;">Sepanjang fase pra-kejadian hingga pasca-kejadian terjadi pergeseran yang signifikan dengan tipikal geseran menjauh dari sensor atau deflasi</p>
+                </div>
+                <div class="col-md-6 justify-content-start">
+                  <div class="map-wrapper">
+                    <div id="mapdiv2" style="padding-right: 100px; padding-left: 200px;"></div>
+                    <script>
+                      var highlightLayer;
+                      function highlightFeature(e) {
+                          highlightLayer = e.target;
+                          highlightLayer.openPopup();
+                      }
+                      var petaa = L.map("mapdiv2", {
+                        gestureHandling: true
+                      }).setView([63.8926,-22.3003],10);
+                      var osms = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+                      );
+                      osms.addTo(petaa);
+                      var bounds_group = new L.featureGroup([]);
+                      function setBounds() {
+                          if (bounds_group.getLayers().length) {
+                              petaa.fitBounds(bounds_group.getBounds());
+                          }
+                      }
+                      petaa.createPane('pane_Wrapped_0');
+                      petaa.getPane('pane_Wrapped_0').style.zIndex = 400;
+                      var img_Wrapped_0 = 'data/Wrapped_0.png';
+                      var img_bounds_Wrapped_0 = [[63.822201880354015,-22.441918193499966],[63.96302104361162,-22.098656480735695]];
+                      var layer_Wrapped_0 = new L.imageOverlay(img_Wrapped_0,
+                                                            img_bounds_Wrapped_0,
+                                                            {pane: 'pane_Wrapped_0'});
+                      bounds_group.addLayer(layer_Wrapped_0);
+                      petaa.addLayer(layer_Wrapped_0);
+                      petaa.createPane('pane_Unwrapped_1');
+                      petaa.getPane('pane_Unwrapped_1').style.zIndex = 401;
+                      var img_Unwrapped_1 = 'data/Unwrapped_1.png';
+                      var img_bounds_Unwrapped_1 = [[63.822201880354015,-22.441918193499966],[63.96302104361162,-22.098656480735695]];
+                      var layer_Unwrapped_1 = new L.imageOverlay(img_Unwrapped_1,
+                                                            img_bounds_Unwrapped_1,
+                                                            {pane: 'pane_Unwrapped_1'});
+                      bounds_group.addLayer(layer_Unwrapped_1);
+                      petaa.addLayer(layer_Unwrapped_1);
+                      setBounds();
+                      L.ImageOverlay.include({
+                          getBounds: function () {
+                              return this._bounds;
+                          }
+                      });
+                    </script>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </section>
+  </body>
+</html>
